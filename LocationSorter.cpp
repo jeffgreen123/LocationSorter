@@ -7,9 +7,11 @@
 #include <string>  
 using namespace std;
 
+
 typedef std::pair<float,int> distancePathPair;
 bool distancePairComparator ( const distancePathPair& l, const distancePathPair& r)
    { return l.first > r.first; }
+
 
 struct Location {
     float latitude;
@@ -19,16 +21,23 @@ struct Location {
     string address;
 };
 
+typedef std::pair<float, Location> locationRadiansPair;
+bool locationRadiansComparator ( const locationRadiansPair& l, const locationRadiansPair& r)
+   { return l.first > r.first; }
+
 struct Path {
     Location start;
     Location stop;
-    vector <Location> otherPoints;
+    vector <locationRadiansPair> otherPoints;
 };
 
-
+/*
 typedef std::pair<float, Location> locationDistancePair;
 bool locationPairCcomparator ( const locationDistancePair& l, const locationDistancePair& r)
    { return l.first < r.first; }
+*/
+
+
 
 
 // Oshawa = 78.8658,43.8971
@@ -46,51 +55,114 @@ bool locationPairCcomparator ( const locationDistancePair& l, const locationDist
 // Richmond Hill = 79.4403,43.8828
 
 int numDays = 5; //number of unqiue paths (days of work)
-int extra = 31; //number of outlying points
-int numPerDay = 7; //number of extra jobs per day
+int extra = 30; //number of outlying points
+int numPerDay = 6; //number of extra jobs per day
 
-// get the distance of a point to a given line (defined by (x1,y1) to (x2,y2))
-float getLineDistance(float x, float y, float x1, float y1, float x2, float y2){
-  float A = x - x1;
-  float B = y - y1;
-  float C = x2 - x1;
-  float D = y2 - y1;
-
-  float dot = A * C + B * D;
-  float len_sq = C * C + D * D;
-  float param = -1;
-  if (len_sq != 0) //in case of 0 length line
-      param = dot / len_sq;
-
-  float xx, yy;
-
-  if (param < 0) {
-    xx = x1;
-    yy = y1;
-  }
-  else if (param > 1) {
-    xx = x2;
-    yy = y2;
-  }
-  else {
-    xx = x1 + param * C;
-    yy = y1 + param * D;
-  }
-
-  float dx = x - xx;
-  float dy = y - yy;
-  return sqrtf(dx * dx + dy * dy);
+float getAverageRadians(vector<locationRadiansPair> locations) {
+    float average = 0;
+    for(int i = 0; i < locations.size(); i++) {
+        average += locations.at(i).first;
+    }
+    average = average/locations.size();
+    return average;
 }
 
-//get the distance between the two best paths for the location
-float getDistanceBetweenNext (Location l) {
-    return l.distances.at(l.distances.size() - 2).first - l.distances.back().first;
+int * travellingSalesman(Path set, int numJobs) {
+    int finalPath[numJobs];
+    int order [numJobs];
+    for(int i = 0; i < numJobs; i++){
+        order[i] = i;
+    }
+    float minDistance = 1000000000;
+    do {
+        float diffStartToOthersX = fabs(set.start.latitude - set.otherPoints.at(order[0]).second.latitude);
+        float diffStopToOthersX = fabs(set.stop.latitude - set.otherPoints.at(order[numJobs - 1]).second.latitude);;
+        float diffStartToOthersY= fabs(set.start.longtitude - set.otherPoints.at(order[0]).second.longtitude);;
+        float diffStopToOthersY = fabs(set.stop.longtitude - set.otherPoints.at(order[numJobs - 1]).second.longtitude);;
+        float distance = sqrtf(pow(diffStartToOthersX,2) + pow(diffStartToOthersY,2)); + sqrtf(pow(diffStopToOthersX,2) + pow(diffStopToOthersY,2));;
+        
+        for(int i = 0; i < numJobs - 1; i++) {
+            float diffX = fabs(set.otherPoints.at(order[i]).second.latitude - set.otherPoints.at(order[i + 1]).second.latitude);
+            float diffY = fabs(set.otherPoints.at(order[i]).second.longtitude - set.otherPoints.at(order[i + 1]).second.longtitude);
+            distance += sqrtf(pow(diffX,2) + pow(diffY,2));
+        }
+        if(distance <= minDistance){
+            for(int i = 0; i < numJobs; i++){
+                finalPath[i] = order[i];
+            }
+            
+            minDistance = distance;
+        }
+        //std::cout << order[0] << ' ' << order[1] << ' ' << order[2] << ' ' << order[3] << ' ' << order[4] << '\n';
+  } while ( std::next_permutation(order,order + numJobs) );
+  for( int i = 0; i < numJobs; i++) {
+      cout << finalPath[i] << ' ';
+  }
+  cout << endl;
 }
+
+void adjustUnevenDays(Path sets[]) {
+    float averages[numDays];
+    for(int i = 0; i < numDays; i++) {
+        averages[i] = getAverageRadians(sets[i].otherPoints);
+    }
+    for(int i = numDays - 2; i > 0; i--) {
+        for( int j = 0; j < sets[i].otherPoints.size(); j++) {
+            //cout << i << endl;
+            if(fabs(sets[i].otherPoints.at(j).first - averages[i + 1]) <= fabs(sets[i].otherPoints.at(j).first - averages[i]) && sets[i + 1].otherPoints.size() < numPerDay) {
+                sets[i + 1].otherPoints.push_back(sets[i].otherPoints.at(j));
+                sets[i].otherPoints.erase(sets[i].otherPoints.begin() + j);
+                j -= 1;
+            }
+        }
+    }
+}
+
+void divideLocations(vector <locationRadiansPair> locations) {
+    Path sets [6];
+    int farthest_point = 0;
+    for(int i = 0; i < extra; i++) {
+        float distanceMin = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
+        float distanceCurrent = sqrtf(pow(locations[i].second.latitude,2) + pow(locations[i].second.longtitude, 2));
+        if (distanceCurrent >= distanceMin) {
+            farthest_point = i;
+        }
+    }
+    float radius = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
+    //cout << radius << endl;
+    float x = radius;
+    float y = 0;
+    float y_adder = radius/1000;
+
+    bool reached_top = false;
+    int currSet = 0; //current path being filled
+    while(!locations.empty() && currSet < numDays) {
+        sets[currSet].otherPoints.push_back(locations.back());
+        locations.pop_back();
+        if(sets[currSet].otherPoints.size() == numPerDay) {
+            currSet++;
+        }
+    }
+
+    adjustUnevenDays(sets);
+    for(int i = 0; i < numDays; i++) {
+        travellingSalesman(sets[i],sets[i].otherPoints.size());
+    }
+
+    for(int i = 0; i < numDays; i++) {
+        cout << "PATH " << i << endl;
+        for(int j = 0; j < sets[i].otherPoints.size(); j++) {
+            cout << sets[i].otherPoints.at(j).second.latitude << "," << sets[i].otherPoints.at(j).second.longtitude << " " ;
+        }
+        cout << endl;
+    }
+}
+
 
 int main (int argc, char *argv[]) {
     cout << argc << endl;
     //error checking
-    if(extra >= numDays*numPerDay) {
+    if(extra > numDays*numPerDay) {
         cerr << "NOT ENOUGH DAYS/JOBS PER DAY FOR THE NUMBER OF JOBS" << endl;
         cerr << "CURRENT MAX: " << numDays*numPerDay << endl;
         cerr << "NUM JOBS: " << extra <<endl;
@@ -98,27 +170,34 @@ int main (int argc, char *argv[]) {
     }
     //start locations
     Location s1 = {1,2};
-    Location s2 = {2,2};
-    Location s3 = {1,4};
-    Location s4 = {1,1};
-    Location s5 = {2,1};
+    Location s2 = {1,2};
+    Location s3 = {1,2};
+    Location s4 = {1,2};
+    Location s5 = {1,2};
     Location starts [] = {s1,s2,s3,s4,s5};
 
     //finish locations locations
-    Location f1 = {-65,3};
-    Location f2 = {-50,50};
-    Location f3 = {3,56};
-    Location f4 = {66,45};
-    Location f5 = {56,3};
+    Location f1 = {5,3};
+    Location f2 = {5,3};
+    Location f3 = {5,3};
+    Location f4 = {5,3};
+    Location f5 = {5,3};
 
     Location finishes [] = {f1,f2,f3,f4,f5};
 
     //additional locations
+
     Location otherPoints [] = {{-52,1},{-45,1},{-44,3},{-38,4},{-22,2},{-15,3}, {-12,2},{-8,1}, {-6,4},
         {-49,51},{-48,52},{-46,54},{-27,51},
         {5,23},{4,33},{3,35},{4,44},{2,45},{3,55},
         {33,33},{45,45},{50,50},{52,52},{66,45},
-        {35,3},{49,2},{50,3},{50,1},{52,2},{53,3},{54,1}};
+        {35,3},{49,2},{50,3},{50,1},{52,2},{53,3}};
+    vector<locationRadiansPair> locationsR;
+        for( int i = 0; i < extra; i++){
+            locationRadiansPair pair = locationRadiansPair(atan2(otherPoints[i].longtitude,otherPoints[i].latitude),otherPoints[i]);
+            locationsR.push_back(pair);
+        }
+    vector <Location> otherPointsVec (otherPoints , otherPoints  + sizeof(otherPoints ) / sizeof(otherPoints [0])); 
 
     //create days (paths)
     Path path1 = {starts[0],finishes[0]};
@@ -128,66 +207,9 @@ int main (int argc, char *argv[]) {
     Path path5 = {starts[4],finishes[4]};
 
     Path paths []   = {path1,path2,path3,path4,path5};
-
-    // get closest distance for each extra point to each path
-    for( int i = 0; i < numDays; i++) {
-
-        float slope = (paths[i].stop.longtitude - paths[i].start.longtitude)/(paths[i].stop.latitude - paths[i].start.latitude);
-
-        for(int j = 0; j < extra; j++){
-            float distance = getLineDistance(otherPoints[j].latitude,otherPoints[j].longtitude,
-                                                            paths[i].start.latitude,paths[i].start.longtitude,
-                                                            paths[i].stop.latitude,paths[i].stop.longtitude);
-            distancePathPair newPair = distancePathPair(distance,i);
-            otherPoints[j].distances.push_back(newPair);
-        }
-        
-    }
-
-    vector <locationDistancePair> locationDistanceVector;
-    for(int i = 0; i < extra; i++) {
-        // sort the distances from least to greatest
-        std::sort(otherPoints[i].distances.begin(),otherPoints[i].distances.begin()+numDays,distancePairComparator);
-        // get the distance between the two best paths (the loss if we cant put it in the disired path)
-        otherPoints[i].distanceBetweenNext = getDistanceBetweenNext(otherPoints[i]);
-
-        locationDistanceVector.push_back(locationDistancePair(otherPoints[i].distanceBetweenNext,otherPoints[i]));
-        //cout <<  otherPoints[i].distanceBetweenNext << endl;
-    }
-
-    std::sort(locationDistanceVector.begin(),locationDistanceVector.end(), locationPairCcomparator);
-    for(int i = 0; i < extra; i++) {
-        //cout <<  otherPoints[i].distanceBetweenNext << endl;
-    }
-    while(!locationDistanceVector.empty()) {
-        // get the location with the largest difference in distances for paths (worst if cant fit in disired path)
-        Location loc = locationDistanceVector.back().second;
-        // get the desired path of this location
-        int bestChoice = loc.distances.back().second;
-
-        //cout << locationDistanceVector.size() << endl;
-        // if can go in disired path, put it in 
-        if(paths[bestChoice].otherPoints.size() < numPerDay) {
-            // add location to path and remove location from pending locations
-            paths[bestChoice].otherPoints.push_back(loc);
-            locationDistanceVector.pop_back();
-        }
-        else {
-            // pop off closest distance because path is full
-            locationDistanceVector.back().second.distances.pop_back();
-            // calculate new difference
-            locationDistanceVector.back().second.distanceBetweenNext = getDistanceBetweenNext(locationDistanceVector.back().second);
-            // resort the vector
-            std::sort(locationDistanceVector.begin(),locationDistanceVector.end(), locationPairCcomparator);
-        }
-    }
-
-    for(int i = 0; i < numDays; i++) {
-        for(int j = 0; j < paths[i].otherPoints.size(); j++) {
-            cout << paths[i].otherPoints.at(j).latitude << "," << paths[i].otherPoints[j].longtitude << ";";
-        }
-        cout << endl;
-    }
+    sort(locationsR.begin(),locationsR.end(),locationRadiansComparator);
+    
+    divideLocations(locationsR);
 
   return 0;
 }

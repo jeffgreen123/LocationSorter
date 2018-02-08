@@ -56,7 +56,7 @@ bool locationPairCcomparator ( const locationDistancePair& l, const locationDist
 
 int numDays = 5; //number of unqiue paths (days of work)
 int extra = 30; //number of outlying points
-int numPerDay = 6; //number of extra jobs per day
+int numPerDay = 7; //number of extra jobs per day
 
 float getAverageRadians(vector<locationRadiansPair> locations) {
     float average = 0;
@@ -67,38 +67,71 @@ float getAverageRadians(vector<locationRadiansPair> locations) {
     return average;
 }
 
-int * travellingSalesman(Path set, int numJobs) {
+float getAverageX(vector<locationRadiansPair> locations) {
+    float average = 0;
+    for(int i = 0; i < locations.size(); i++) {
+        average += locations.at(i).second.latitude;
+    }
+    average = average/locations.size();
+    return average;
+}
+
+float getAverageY(vector<locationRadiansPair> locations) {
+    float average = 0;
+    for(int i = 0; i < locations.size(); i++) {
+        average += locations.at(i).second.longtitude;
+    }
+    average = average/locations.size();
+    return average;
+}
+
+float getDistanceBetweenPoints(Location l1, Location l2) {
+    float distX = fabs(l1.latitude - l2.latitude);
+    float distY = fabs(l1.longtitude - l2.longtitude);
+    //cout << l1.latitude << ',' <<  l1.longtitude <<  endl;
+    return sqrtf(pow(distX,2) + pow(distY,2));
+}
+
+float getAverageDistance(vector<locationRadiansPair> locations, Location point, int currIndex) {
+    float average = 0;
+    for(int i = 0; i < locations.size(); i++) {
+        if( i != currIndex) {
+            average += getDistanceBetweenPoints(locations.at(i).second, point);
+        }
+    }
+    average = average/(locations.size() - 1);
+    return average;
+}
+
+void travellingSalesman(Path set, int numJobs) {
+    //cout << numJobs <<endl;
     int finalPath[numJobs];
     int order [numJobs];
     for(int i = 0; i < numJobs; i++){
         order[i] = i;
+        finalPath[i] = i;
     }
     float minDistance = 1000000000;
     do {
-        float diffStartToOthersX = fabs(set.start.latitude - set.otherPoints.at(order[0]).second.latitude);
-        float diffStopToOthersX = fabs(set.stop.latitude - set.otherPoints.at(order[numJobs - 1]).second.latitude);;
-        float diffStartToOthersY= fabs(set.start.longtitude - set.otherPoints.at(order[0]).second.longtitude);;
-        float diffStopToOthersY = fabs(set.stop.longtitude - set.otherPoints.at(order[numJobs - 1]).second.longtitude);;
-        float distance = sqrtf(pow(diffStartToOthersX,2) + pow(diffStartToOthersY,2)); + sqrtf(pow(diffStopToOthersX,2) + pow(diffStopToOthersY,2));;
         
+        float distance = getDistanceBetweenPoints(set.start,set.otherPoints.at(order[0]).second) + 
+            getDistanceBetweenPoints(set.stop,set.otherPoints.at(order[numJobs-1]).second);
         for(int i = 0; i < numJobs - 1; i++) {
-            float diffX = fabs(set.otherPoints.at(order[i]).second.latitude - set.otherPoints.at(order[i + 1]).second.latitude);
-            float diffY = fabs(set.otherPoints.at(order[i]).second.longtitude - set.otherPoints.at(order[i + 1]).second.longtitude);
-            distance += sqrtf(pow(diffX,2) + pow(diffY,2));
+            distance += getDistanceBetweenPoints(set.otherPoints.at(order[i]).second,set.otherPoints.at(order[i + 1]).second);
         }
         if(distance <= minDistance){
             for(int i = 0; i < numJobs; i++){
                 finalPath[i] = order[i];
             }
-            
             minDistance = distance;
         }
-        //std::cout << order[0] << ' ' << order[1] << ' ' << order[2] << ' ' << order[3] << ' ' << order[4] << '\n';
-  } while ( std::next_permutation(order,order + numJobs) );
+  } while ( std::next_permutation(order, order + numJobs) );
+  cout << "DISTANCE:"  << minDistance << endl;
+  cout << set.start.latitude << ',' << set.start.longtitude << " to ";
   for( int i = 0; i < numJobs; i++) {
-      cout << finalPath[i] << ' ';
+      cout << set.otherPoints.at(finalPath[i]).second.latitude << ',' << set.otherPoints.at(finalPath[i]).second.longtitude << " to ";
   }
-  cout << endl;
+  cout << set.stop.latitude << ',' << set.stop.longtitude << endl;
 }
 
 void adjustUnevenDays(Path sets[]) {
@@ -109,7 +142,8 @@ void adjustUnevenDays(Path sets[]) {
     for(int i = numDays - 2; i > 0; i--) {
         for( int j = 0; j < sets[i].otherPoints.size(); j++) {
             //cout << i << endl;
-            if(fabs(sets[i].otherPoints.at(j).first - averages[i + 1]) <= fabs(sets[i].otherPoints.at(j).first - averages[i]) && sets[i + 1].otherPoints.size() < numPerDay) {
+            if(fabs(sets[i].otherPoints.at(j).first - averages[i + 1]) <= fabs(sets[i].otherPoints.at(j).first - averages[i]) 
+                && sets[i + 1].otherPoints.size() < numPerDay) {
                 sets[i + 1].otherPoints.push_back(sets[i].otherPoints.at(j));
                 sets[i].otherPoints.erase(sets[i].otherPoints.begin() + j);
                 j -= 1;
@@ -118,8 +152,38 @@ void adjustUnevenDays(Path sets[]) {
     }
 }
 
+// attempt to swap any locations that are closer to the elements in another path
+void adjustSwaps(Path& p1, Path& p2) {
+
+    for(int i = 0; i < p1.otherPoints.size(); i++) {
+
+
+        for(int j = 0; j < p2.otherPoints.size(); j++) {
+            float averageL2P1Dist = getAverageDistance(p1.otherPoints, p2.otherPoints.at(j).second,j);
+            float averageL2P2Dist = getAverageDistance(p2.otherPoints, p2.otherPoints.at(j).second,j);
+            float averageL1P1Dist = getAverageDistance(p1.otherPoints, p1.otherPoints.at(i).second,i);
+            float averageL1P2Dist = getAverageDistance(p2.otherPoints, p1.otherPoints.at(i).second,i);
+            
+            if((averageL1P1Dist - averageL1P2Dist) + (averageL2P2Dist - averageL2P1Dist) >= 0) {
+                cout << "SWAP" << endl;
+                cout << p1.otherPoints.at(i).second.latitude << "," << p1.otherPoints.at(i).second.longtitude << endl;
+                cout << "AND" << endl;
+                cout << p2.otherPoints.at(j).second.latitude << "," << p2.otherPoints.at(j).second.longtitude << endl;
+                locationRadiansPair temp = p2.otherPoints.at(j);
+                p2.otherPoints.at(j) = p1.otherPoints.at(i);
+                p1.otherPoints.at(i) = temp;
+                
+            }
+            
+        }
+     }
+
+}
+
 void divideLocations(vector <locationRadiansPair> locations) {
-    Path sets [6];
+    Path sets [numDays];
+    Location s1 = {1,2};
+    Location f1 = {5,3};
     int farthest_point = 0;
     for(int i = 0; i < extra; i++) {
         float distanceMin = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
@@ -128,6 +192,7 @@ void divideLocations(vector <locationRadiansPair> locations) {
             farthest_point = i;
         }
     }
+
     float radius = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
     //cout << radius << endl;
     float x = radius;
@@ -135,6 +200,7 @@ void divideLocations(vector <locationRadiansPair> locations) {
     float y_adder = radius/1000;
 
     bool reached_top = false;
+
     int currSet = 0; //current path being filled
     while(!locations.empty() && currSet < numDays) {
         sets[currSet].otherPoints.push_back(locations.back());
@@ -144,8 +210,21 @@ void divideLocations(vector <locationRadiansPair> locations) {
         }
     }
 
+
     adjustUnevenDays(sets);
+
     for(int i = 0; i < numDays; i++) {
+        for(int j = i + 1; j < numDays; j++) {
+            adjustSwaps(sets[i],sets[j]); // swap the days that belong in diffrent path based on average distance
+        }
+    }
+    
+    for(int i = 0; i < numPerDay; i++){
+        cout << sets[0].otherPoints.at(i).second.latitude << endl;
+    }
+    for(int i = 0; i < numDays; i++) {
+        sets[i].start = s1;
+        sets[i].stop = f1;
         travellingSalesman(sets[i],sets[i].otherPoints.size());
     }
 

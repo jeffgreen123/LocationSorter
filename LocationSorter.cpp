@@ -67,24 +67,6 @@ float getAverageRadians(vector<locationRadiansPair> locations) {
     return average;
 }
 
-float getAverageX(vector<locationRadiansPair> locations) {
-    float average = 0;
-    for(int i = 0; i < locations.size(); i++) {
-        average += locations.at(i).second.latitude;
-    }
-    average = average/locations.size();
-    return average;
-}
-
-float getAverageY(vector<locationRadiansPair> locations) {
-    float average = 0;
-    for(int i = 0; i < locations.size(); i++) {
-        average += locations.at(i).second.longtitude;
-    }
-    average = average/locations.size();
-    return average;
-}
-
 float getDistanceBetweenPoints(Location l1, Location l2) {
     float distX = fabs(l1.latitude - l2.latitude);
     float distY = fabs(l1.longtitude - l2.longtitude);
@@ -126,11 +108,14 @@ void travellingSalesman(Path set, int numJobs) {
             minDistance = distance;
         }
   } while ( std::next_permutation(order, order + numJobs) );
+
   cout << "DISTANCE:"  << minDistance << endl;
   cout << set.start.latitude << ',' << set.start.longtitude << " to ";
+
   for( int i = 0; i < numJobs; i++) {
       cout << set.otherPoints.at(finalPath[i]).second.latitude << ',' << set.otherPoints.at(finalPath[i]).second.longtitude << " to ";
   }
+
   cout << set.stop.latitude << ',' << set.stop.longtitude << endl;
 }
 
@@ -154,10 +139,7 @@ void adjustUnevenDays(Path sets[]) {
 
 // attempt to swap any locations that are closer to the elements in another path
 void adjustSwaps(Path& p1, Path& p2) {
-
     for(int i = 0; i < p1.otherPoints.size(); i++) {
-
-
         for(int j = 0; j < p2.otherPoints.size(); j++) {
             float averageL2P1Dist = getAverageDistance(p1.otherPoints, p2.otherPoints.at(j).second,j);
             float averageL2P2Dist = getAverageDistance(p2.otherPoints, p2.otherPoints.at(j).second,j);
@@ -172,34 +154,15 @@ void adjustSwaps(Path& p1, Path& p2) {
                 locationRadiansPair temp = p2.otherPoints.at(j);
                 p2.otherPoints.at(j) = p1.otherPoints.at(i);
                 p1.otherPoints.at(i) = temp;
-                
             }
-            
         }
      }
-
 }
 
 void divideLocations(vector <locationRadiansPair> locations) {
     Path sets [numDays];
     Location s1 = {1,2};
     Location f1 = {5,3};
-    int farthest_point = 0;
-    for(int i = 0; i < extra; i++) {
-        float distanceMin = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
-        float distanceCurrent = sqrtf(pow(locations[i].second.latitude,2) + pow(locations[i].second.longtitude, 2));
-        if (distanceCurrent >= distanceMin) {
-            farthest_point = i;
-        }
-    }
-
-    float radius = sqrtf(pow(locations[farthest_point].second.latitude,2) + pow(locations[farthest_point].second.longtitude, 2));
-    //cout << radius << endl;
-    float x = radius;
-    float y = 0;
-    float y_adder = radius/1000;
-
-    bool reached_top = false;
 
     int currSet = 0; //current path being filled
     while(!locations.empty() && currSet < numDays) {
@@ -210,8 +173,7 @@ void divideLocations(vector <locationRadiansPair> locations) {
         }
     }
 
-
-    adjustUnevenDays(sets);
+    adjustUnevenDays(sets); // if didnt fill all days, see if we can push some into the last set to minimize distance
 
     for(int i = 0; i < numDays; i++) {
         for(int j = i + 1; j < numDays; j++) {
@@ -219,9 +181,6 @@ void divideLocations(vector <locationRadiansPair> locations) {
         }
     }
     
-    for(int i = 0; i < numPerDay; i++){
-        cout << sets[0].otherPoints.at(i).second.latitude << endl;
-    }
     for(int i = 0; i < numDays; i++) {
         sets[i].start = s1;
         sets[i].stop = f1;

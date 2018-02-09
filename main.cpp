@@ -199,19 +199,19 @@ int main(int argc, char **argv)
      points[i]->setGeometry(400 + XYvals[i][0]*4,400 - XYvals[i][1]*4, 8, 8);
      locations.push_back(points[i]);
  }
- for( int i = 0; i < 30; i++){
-     cout << locations.at(i)->getRadians();
- }
 
  sort(locations.begin(),locations.end(),locationRadiansComparator);
 
  Path * sets [numDays];
  for(int i = 0; i < numDays; i++) {
      sets[i] = new Path(&window);
+     sets[i]->setGeometry(0,0,windowSize,windowSize);
  }
 
  divideLocations(locations,starts,stops,sets);
-
+ for(int i = 0; i < numDays; i++) {
+     sets[i]->setColor(Qt::red);
+ }
 
  window.show();
  return app.exec();

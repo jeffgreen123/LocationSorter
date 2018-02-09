@@ -12,7 +12,7 @@ class Path : public QWidget
 private:
     LocationWidget *start;
     LocationWidget *stop;
-
+    //QBrush color;
 public:
     vector <LocationWidget * > otherPoints;
     explicit Path(QWidget *parent = nullptr);
@@ -20,9 +20,9 @@ public:
     void setStart(LocationWidget * l);
     LocationWidget * getStop();
     void setStop(LocationWidget * l);
-    vector <LocationWidget * >  getPoints();
-    void setPoint(int i, LocationWidget * l);
-
+    void setColor(QBrush newcolor);
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // PATH_H

@@ -6,6 +6,7 @@
 
 class LocationWidget:public QWidget
 {
+    Q_OBJECT
 private:
     float x,y;
     int windowSize;

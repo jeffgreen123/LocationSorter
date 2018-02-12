@@ -27,6 +27,7 @@ int extra = 30; //number of outlying points
 int numPerDay = 7; //number of extra jobs per day
 int windowSize = 800;
 QBrush pathColors [7];
+
 float getAverageRadians(vector<LocationWidget *> locations) {
     float average = 0;
     for(int i = 0; i < locations.size(); i++) {
@@ -53,6 +54,7 @@ float getAverageDistance(vector<LocationWidget *> locations, LocationWidget * po
     average = average/(locations.size() - 1);
     return average;
 }
+
 void adjustUnevenDays(Path * sets[]) {
     float averages[numDays];
     for(int i = 0; i < numDays; i++) {
@@ -70,8 +72,6 @@ void adjustUnevenDays(Path * sets[]) {
         }
     }
 }
-
-
 // attempt to swap any locations that are closer to the elements in another path
 void adjustSwaps(Path * p1, Path * p2) {
     for(int i = 0; i < p1->otherPoints.size(); i++) {
@@ -164,6 +164,7 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
         cout << endl;
     }
 }
+
 int main(int argc, char **argv)
 {
  QApplication app (argc, argv);
@@ -204,14 +205,11 @@ int main(int argc, char **argv)
 
  Path * sets [numDays];
  for(int i = 0; i < numDays; i++) {
-     sets[i] = new Path(&window);
+     sets[i] = new Path(&window,pathColors[i]);
      sets[i]->setGeometry(0,0,windowSize,windowSize);
  }
 
  divideLocations(locations,starts,stops,sets);
- for(int i = 0; i < numDays; i++) {
-     sets[i]->setColor(Qt::red);
- }
 
  window.show();
  return app.exec();

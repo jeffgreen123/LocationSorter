@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "locationwidget.h"
 #include <vector>
+
 using namespace std;
 class Path : public QWidget
 {
@@ -12,15 +13,15 @@ class Path : public QWidget
 private:
     LocationWidget *start;
     LocationWidget *stop;
-    //QBrush color;
+    QBrush color;
 public:
     vector <LocationWidget * > otherPoints;
-    explicit Path(QWidget *parent = nullptr);
+    Path(QWidget *parent = nullptr, QBrush color = Qt::black);
     LocationWidget * getStart();
     void setStart(LocationWidget * l);
     LocationWidget * getStop();
     void setStop(LocationWidget * l);
-    void setColor(QBrush newcolor);
+    void setColor(QBrush newColor);
 protected:
     void paintEvent(QPaintEvent *event) override;
 };

@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "path.h"
+#include "dashboard.h"
 using namespace std;
 
 
@@ -26,6 +27,7 @@ int numDays = 5; //number of unqiue paths (days of work)
 int extra = 30; //number of outlying points
 int numPerDay = 7; //number of extra jobs per day
 int windowSize = 800;
+int dashBoardSize = 400;
 QBrush pathColors [7];
 
 float getAverageRadians(vector<LocationWidget *> locations) {
@@ -176,7 +178,7 @@ int main(int argc, char **argv)
  pathColors[4] = Qt::cyan;
  pathColors[5] = Qt::magenta;
  pathColors[6] = Qt::darkGreen;
- window.setFixedSize(windowSize, windowSize);
+ window.setFixedSize(windowSize + dashBoardSize, windowSize);
  vector<LocationWidget *> locations;
  vector<LocationWidget *> starts;
  vector<LocationWidget *> stops;
@@ -186,9 +188,8 @@ int main(int argc, char **argv)
                       {33,33},{45,45},{50,50},{52,52},{66,45},
                       {35,3},{49,2},{50,3},{50,1},{52,2},{53,3}};
 
-
+ Path * sets [numDays];
  LocationWidget * points[30];
-
  LocationWidget *s1 = new LocationWidget(&window,1,2,windowSize,Qt::green);
  starts.push_back(s1);
 
@@ -203,14 +204,15 @@ int main(int argc, char **argv)
 
  sort(locations.begin(),locations.end(),locationRadiansComparator);
 
- Path * sets [numDays];
+
  for(int i = 0; i < numDays; i++) {
-     sets[i] = new Path(&window,pathColors[i]);
+     sets[i] = new Path(&window,pathColors[i],true);
      sets[i]->setGeometry(0,0,windowSize,windowSize);
  }
 
  divideLocations(locations,starts,stops,sets);
-
+ dashBoard * d = new dashBoard(&window,sets, numDays);
+ d->setGeometry(windowSize,0, dashBoardSize, windowSize);
  window.show();
  return app.exec();
 }

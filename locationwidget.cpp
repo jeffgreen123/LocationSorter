@@ -8,7 +8,8 @@ using namespace std;
 LocationWidget::LocationWidget(QWidget *parent,float x, float y, int windowSize, QBrush color) :
     QWidget(parent), x(x),y(y),windowSize(windowSize),color(color){
     radians = atan2(y,x);
-    this->setGeometry(windowSize/2 + x*4, windowSize/2 - y*4,8,8);
+    this->setGeometry(windowSize/2 + x*4, windowSize/2 - y*4,100,100);
+    bHighlighted = false;
 
 }
 LocationWidget::LocationWidget(const LocationWidget& l) {
@@ -16,8 +17,15 @@ LocationWidget::LocationWidget(const LocationWidget& l) {
 
 void LocationWidget::paintEvent(QPaintEvent *event){
     QPainter painter(this);
-    painter.setPen(QPen(color, 8, Qt::SolidLine, Qt::RoundCap));
-    painter.drawPoint(4,4);
+
+    if(bHighlighted == true) {
+        painter.setPen(QPen(color, 20, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(50,50);
+    }
+    else {
+        painter.setPen(QPen(color, 8, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(50,50);
+    }
 }
 
 void LocationWidget::mousePressEvent(QMouseEvent*){
@@ -49,4 +57,9 @@ const float LocationWidget::getY() {
 
 void LocationWidget::printInfo() {
     cout << x << "," << y << endl;
+}
+
+void LocationWidget::highlight() {
+    bHighlighted = !bHighlighted;
+    repaint();
 }

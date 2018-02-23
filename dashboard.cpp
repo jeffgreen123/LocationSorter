@@ -11,14 +11,26 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
         setCheckBoxes.push_back(viewCheckBox);
         setLabels.push_back(pathLabel);
         pathLabel->setBuddy(viewCheckBox);
-        mainLayout->addWidget(pathLabel, 0, i*2, Qt::AlignTop);
-        mainLayout->addWidget(viewCheckBox, 0, i*2 + 1, Qt::AlignTop);
+
         QSignalMapper mapper;
+
         connect(viewCheckBox, &QCheckBox::toggled, [=]{
             togglePath(i);
         });
-        mapper.setMapping(viewCheckBox, i);
-        connect(&mapper, SIGNAL(mapped(bool,int)), this, SLOT(togglePath(bool,int)));
+
+        for(int j = 0; j < sets[i]->otherPoints.size();j++) {
+            QPushButton * locationButton = new QPushButton(QString::number(sets[i]->otherPoints[j]->getX()) +
+                                                           "," +
+                                                           QString::number(sets[i]->otherPoints[j]->getY()));
+            connect(locationButton, &QPushButton::pressed, [=]{
+                toggleLocation(i,j);
+            });
+            mainLayout->addWidget(locationButton, j + 1, i*2, Qt::AlignTop);
+
+        }
+
+        mainLayout->addWidget(pathLabel, 0, i*2, Qt::AlignTop);
+        mainLayout->addWidget(viewCheckBox, 0, i*2 + 1, Qt::AlignTop);
     }
 
 
@@ -34,4 +46,8 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
 
 void dashBoard::togglePath(int pathNum) {
     sets[pathNum]->setShowPath(setCheckBoxes[pathNum]->checkState());
+}
+
+void dashBoard::toggleLocation(int pathNum, int locationNum) {
+    sets[pathNum]->otherPoints[locationNum]->highlight();
 }

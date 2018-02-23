@@ -7,6 +7,7 @@
 #include "QSpinBox"
 #include "QCheckBox"
 #include "QGridLayout"
+#include "QPushButton"
 #include "path.h"
 #include "QSignalMapper"
 
@@ -21,6 +22,7 @@ private:
     vector<Path *> sets;
     vector<QLabel *> setLabels;
     vector<QCheckBox *> setCheckBoxes;
+    vector<QPushButton *> locationButton;
     QComboBox *shapeComboBox;
     QSpinBox *penWidthSpinBox;
     QComboBox *penStyleComboBox;
@@ -33,6 +35,7 @@ signals:
 
 public slots:
     void togglePath(int pathNum);
+    void toggleLocation(int pathNum, int locationNum);
 };
 
 #endif // DASHBOARD_H

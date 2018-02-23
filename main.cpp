@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 
  for( int i = 0; i < 30; i++){
      points[i] = new LocationWidget(&window,XYvals[i][0],XYvals[i][1], windowSize);
-     points[i]->setGeometry(400 + XYvals[i][0]*4,400 - XYvals[i][1]*4, 8, 8);
+     points[i]->setGeometry(400 + XYvals[i][0]*4,400 - XYvals[i][1]*4, 100, 100);
      locations.push_back(points[i]);
  }
 

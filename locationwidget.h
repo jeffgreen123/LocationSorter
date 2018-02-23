@@ -13,6 +13,7 @@ private:
     QBrush color;
     QString address;
     float radians;
+    bool bHighlighted;
 public:
     LocationWidget(QWidget *parent,float x, float y, int windowSize, QBrush color = Qt::black);
     LocationWidget(const LocationWidget& l);
@@ -22,6 +23,7 @@ public:
     const float getX();
     const float getY();
     void printInfo();
+    void highlight();
 protected:
     void mousePressEvent(QMouseEvent*) override;
     void paintEvent(QPaintEvent *event) override;

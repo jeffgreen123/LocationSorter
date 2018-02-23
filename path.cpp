@@ -41,10 +41,10 @@ void Path::paintEvent(QPaintEvent *event){
     if(bShowPath) {
         QPainter painter(this);
         painter.setPen(QPen(color, 3, Qt::SolidLine, Qt::RoundCap));
-        painter.drawLine(400 + start->getX()*4 + 4,400 - start->getY()*4 + 4,400 + otherPoints.at(0)->getX()*4 + 4,400 - otherPoints.at(0)->getY()*4 + 4);
+        painter.drawLine(400 + start->getX()*4 + 50,400 - start->getY()*4 + 50,400 + otherPoints.at(0)->getX()*4 + 50,400 - otherPoints.at(0)->getY()*4 + 50);
         for(int i = 0; i < otherPoints.size() - 1; i++) {
-            painter.drawLine(400 + otherPoints.at(i)->getX()*4 + 4,400 - otherPoints.at(i)->getY()*4 + 4,400 + otherPoints.at(i+1)->getX()*4 + 4,400 - otherPoints.at(i+1)->getY()*4 + 4);
+            painter.drawLine(400 + otherPoints.at(i)->getX()*4 + 50,400 - otherPoints.at(i)->getY()*4 + 50,400 + otherPoints.at(i+1)->getX()*4 + 50,400 - otherPoints.at(i+1)->getY()*4 + 50);
         }
-        painter.drawLine(400 + stop->getX()*4 + 4,400 - stop->getY()*4 + 4,400 + otherPoints.at(otherPoints.size() - 1)->getX()*4 + 4,400 - otherPoints.at(otherPoints.size() - 1)->getY()*4 + 4);
+        painter.drawLine(400 + stop->getX()*4 + 50,400 - stop->getY()*4 + 50,400 + otherPoints.at(otherPoints.size() - 1)->getX()*4 + 50,400 - otherPoints.at(otherPoints.size() - 1)->getY()*4 + 50);
     }
 }

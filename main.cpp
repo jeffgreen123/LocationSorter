@@ -26,7 +26,8 @@ bool locationRadiansComparator (LocationWidget*  l,  LocationWidget * r)
 int numDays = 5; //number of unqiue paths (days of work)
 int extra = 30; //number of outlying points
 int numPerDay = 7; //number of extra jobs per day
-int windowSize = 800;
+int windowHeight = 761;
+int windowWidth = 1563;
 int dashBoardSize = 400;
 QBrush pathColors [7];
 
@@ -39,12 +40,6 @@ float getAverageRadians(vector<LocationWidget *> locations) {
     return average;
 }
 
-float getDistanceBetweenPoints(LocationWidget * l1, LocationWidget * l2) {
-    float distX = fabs(l1->getX() - l2->getX());
-    float distY = fabs(l1->getY() - l2->getY());
-    //cout << l1.latitude << ',' <<  l1.longtitude <<  endl;
-    return sqrtf(pow(distX,2) + pow(distY,2));
-}
 
 float getAverageDistance(vector<LocationWidget *> locations, LocationWidget * point, int currIndex) {
     float average = 0;
@@ -96,40 +91,6 @@ void adjustSwaps(Path * p1, Path * p2) {
      }
 }
 
-void travellingSalesman(Path * set, int numJobs) {
-    //cout << numJobs <<endl;
-    int finalPath[numJobs];
-    int order [numJobs];
-    for(int i = 0; i < numJobs; i++){
-        order[i] = i;
-        finalPath[i] = i;
-    }
-    float minDistance = 1000000000;
-    do {
-
-        float distance = getDistanceBetweenPoints(set->getStart(),set->otherPoints.at(order[0])) +
-            getDistanceBetweenPoints(set->getStop(),set->otherPoints.at(order[numJobs-1]));
-        for(int i = 0; i < numJobs - 1; i++) {
-            distance += getDistanceBetweenPoints(set->otherPoints.at(order[i]),set->otherPoints.at(order[i + 1]));
-        }
-        if(distance <= minDistance){
-            for(int i = 0; i < numJobs; i++){
-                finalPath[i] = order[i];
-            }
-            minDistance = distance;
-        }
-  } while ( std::next_permutation(order, order + numJobs) );
-
-  cout << "DISTANCE:"  << minDistance << endl;
-  cout << set->getStart()->getX() << ',' << set->getStart()->getY() << " to ";
-
-  for( int i = 0; i < numJobs; i++) {
-      cout << set->otherPoints.at(finalPath[i])->getX() << ',' << set->otherPoints.at(finalPath[i])->getY() << " to ";
-  }
-
-  cout << set->getStop()->getX() << ',' << set->getStop()->getY() << endl;
-}
-
 void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget *> starts, vector <LocationWidget *> stops, Path * sets []) {
 
 
@@ -153,7 +114,7 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
     for(int i = 0; i < numDays; i++) {
         sets[i]->setStart(starts.at(0));
         sets[i]->setStop(stops.at(0));
-        travellingSalesman(sets[i],sets[i]->otherPoints.size());
+        sets[i]->travellingSalesman();
     }
 
     for(int i = 0; i < numDays; i++) {
@@ -170,7 +131,8 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 int main(int argc, char **argv)
 {
  QApplication app (argc, argv);
- QWidget window;
+ QWidget window1;
+ QWidget window2;
  pathColors[0] = Qt::blue;
  pathColors[1] = Qt::yellow;
  pathColors[2] = Qt::darkCyan;
@@ -178,7 +140,8 @@ int main(int argc, char **argv)
  pathColors[4] = Qt::cyan;
  pathColors[5] = Qt::magenta;
  pathColors[6] = Qt::darkGreen;
- window.setFixedSize(windowSize + dashBoardSize, windowSize);
+ window1.setFixedSize(windowWidth, windowHeight);
+ window2.setFixedSize(dashBoardSize, windowHeight);
  vector<LocationWidget *> locations;
  vector<LocationWidget *> starts;
  vector<LocationWidget *> stops;
@@ -190,15 +153,15 @@ int main(int argc, char **argv)
 
  Path * sets [numDays];
  LocationWidget * points[30];
- LocationWidget *s1 = new LocationWidget(&window,1,2,windowSize,Qt::green);
+ LocationWidget *s1 = new LocationWidget(&window1,1,2,windowWidth, windowHeight,Qt::green);
  starts.push_back(s1);
 
- LocationWidget *f1= new LocationWidget(&window,5,3,windowSize,Qt::red);
+ LocationWidget *f1= new LocationWidget(&window1,5,3,windowWidth, windowHeight,Qt::red);
  stops.push_back(f1);
 
  for( int i = 0; i < 30; i++){
-     points[i] = new LocationWidget(&window,XYvals[i][0],XYvals[i][1], windowSize);
-     points[i]->setGeometry(400 + XYvals[i][0]*4,400 - XYvals[i][1]*4, 100, 100);
+     points[i] = new LocationWidget(&window1,XYvals[i][0],XYvals[i][1], windowWidth, windowHeight);
+     points[i]->setGeometry(windowWidth/2 + XYvals[i][0]*4,windowHeight/2 - XYvals[i][1]*4, 100, 100);
      locations.push_back(points[i]);
  }
 
@@ -206,13 +169,23 @@ int main(int argc, char **argv)
 
 
  for(int i = 0; i < numDays; i++) {
-     sets[i] = new Path(&window,pathColors[i],true);
-     sets[i]->setGeometry(0,0,windowSize,windowSize);
+     sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
+     sets[i]->setGeometry(0,0,windowWidth, windowHeight);
  }
 
  divideLocations(locations,starts,stops,sets);
- dashBoard * d = new dashBoard(&window,sets, numDays);
- d->setGeometry(windowSize,0, dashBoardSize, windowSize);
- window.show();
+ QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
+ //bkgnd = bkgnd.scaled(windowSize,windowSize,Qt::KeepAspectRatio);
+ QPalette palette;
+ palette.setBrush(QPalette::Background, bkgnd);
+ window1.setPalette(palette);
+
+ dashBoard * d = new dashBoard(&window2,sets, numDays);
+ d->setGeometry(0,0, dashBoardSize, windowHeight);
+
+
+
+ window1.show();
+ window2.show();
  return app.exec();
 }

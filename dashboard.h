@@ -19,23 +19,21 @@ public:
 
 private:
     int numDays;
+    LocationWidget * select1;
+    LocationWidget * select2;
+    int currSelection; //currently selecting #1 or #2 locationwidget
     vector<Path *> sets;
     vector<QLabel *> setLabels;
     vector<QCheckBox *> setCheckBoxes;
     vector<QPushButton *> locationButton;
-    QComboBox *shapeComboBox;
-    QSpinBox *penWidthSpinBox;
-    QComboBox *penStyleComboBox;
-    QComboBox *penCapComboBox;
-    QComboBox *penJoinComboBox;
-    QComboBox *brushStyleComboBox;
-    QCheckBox *antialiasingCheckBox;
-    QCheckBox *transformationsCheckBox;
+    vector<QLabel *> coordinatesLabels;
+    vector<QLabel *> addressLabels;
 signals:
 
 public slots:
     void togglePath(int pathNum);
     void toggleLocation(int pathNum, int locationNum);
+    void swapLocations();
 };
 
 #endif // DASHBOARD_H

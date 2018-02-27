@@ -1,14 +1,9 @@
 #include "locationwidget.h"
-#include "QPen"
-#include "QPainter"
-#include "math.h"
-#include "string.h"
-#include <iostream>
+
 using namespace std;
-LocationWidget::LocationWidget(QWidget *parent,float x, float y, int windowSize, QBrush color) :
-    QWidget(parent), x(x),y(y),windowSize(windowSize),color(color){
+LocationWidget::LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight, QBrush color) :
+    QWidget(parent), x(x),y(y),windowHeight(windowHeight),windowWidth(windowWidth),color(color){
     radians = atan2(y,x);
-    this->setGeometry(windowSize/2 + x*4, windowSize/2 - y*4,100,100);
     bHighlighted = false;
 
 }
@@ -44,6 +39,12 @@ void LocationWidget::setAddress(QString newAddress) {
     address = newAddress;
 }
 
+void LocationWidget::setCoordinates(float x, float y) {
+    this->x = x;
+    this->y = y;
+    repaint();
+}
+
 const float LocationWidget::getRadians() {
        return radians;
 }
@@ -53,6 +54,14 @@ const float LocationWidget::getX() {
 }
 const float LocationWidget::getY() {
        return y;
+}
+
+const QBrush LocationWidget::getColor() {
+    return color;
+}
+
+const QString LocationWidget::getAddress() {
+    return address;
 }
 
 void LocationWidget::printInfo() {

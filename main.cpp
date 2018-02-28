@@ -9,6 +9,15 @@
 #include <string>
 #include "path.h"
 #include "dashboard.h"
+#include <QGeoCoordinate>
+#include <QGeoAddress>
+#include <QGeoLocation>
+#include <QApplication>
+#include <QGeoAddress>
+#include <QGeoCodingManager>
+#include <QGeoCoordinate>
+#include <QGeoLocation>
+#include <QGeoServiceProvider>
 using namespace std;
 
 
@@ -26,9 +35,13 @@ bool locationRadiansComparator (LocationWidget*  l,  LocationWidget * r)
 int numDays = 5; //number of unqiue paths (days of work)
 int extra = 30; //number of outlying points
 int numPerDay = 7; //number of extra jobs per day
-int windowHeight = 761;
-int windowWidth = 1563;
+int windowHeight = 682;
+int windowWidth = 1400;
 int dashBoardSize = 400;
+float maxX = -78.365;
+float minX = -80.51;
+float maxY = 43.52;
+float minY = 44.275;
 QBrush pathColors [7];
 
 float getAverageRadians(vector<LocationWidget *> locations) {
@@ -79,10 +92,10 @@ void adjustSwaps(Path * p1, Path * p2) {
             float averageL1P2Dist = getAverageDistance(p2->otherPoints, p1->otherPoints.at(i),i);
 
             if((averageL1P1Dist - averageL1P2Dist) + (averageL2P2Dist - averageL2P1Dist) >= 0) {
-                cout << "SWAP" << endl;
-                cout << p1->otherPoints.at(i)->getX() << "," << p1->otherPoints.at(i)->getY() << endl;
-                cout << "AND" << endl;
-                cout << p2->otherPoints.at(j)->getX() << "," << p2->otherPoints.at(j)->getY() << endl;
+               // cout << "SWAP" << endl;
+                //cout << p1->otherPoints.at(i)->getX() << "," << p1->otherPoints.at(i)->getY() << endl;
+                //cout << "AND" << endl;
+               // cout << p2->otherPoints.at(j)->getX() << "," << p2->otherPoints.at(j)->getY() << endl;
                 LocationWidget * temp = p2->otherPoints.at(j);
                 p2->otherPoints.at(j) = p1->otherPoints.at(i);
                 p1->otherPoints.at(i) = temp;
@@ -118,74 +131,96 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
     }
 
     for(int i = 0; i < numDays; i++) {
-        cout << "PATH " << i << endl;
+        //cout << "PATH " << i << endl;
         for(int j = 0; j < sets[i]->otherPoints.size(); j++) {
-            sets[i]->otherPoints.at(j)->printInfo();
+            //sets[i]->otherPoints.at(j)->printInfo();
             sets[i]->otherPoints.at(j)->setColor(pathColors[i]);
             //cout << sets[i].otherPoints.at(j).second.latitude << "," << sets[i].otherPoints.at(j).second.longtitude << " " ;
         }
-        cout << endl;
+        //cout << endl;
     }
 }
 
 int main(int argc, char **argv)
 {
- QApplication app (argc, argv);
- QWidget window1;
- QWidget window2;
- pathColors[0] = Qt::blue;
- pathColors[1] = Qt::yellow;
- pathColors[2] = Qt::darkCyan;
- pathColors[3] = Qt::gray;
- pathColors[4] = Qt::cyan;
- pathColors[5] = Qt::magenta;
- pathColors[6] = Qt::darkGreen;
- window1.setFixedSize(windowWidth, windowHeight);
- window2.setFixedSize(dashBoardSize, windowHeight);
- vector<LocationWidget *> locations;
- vector<LocationWidget *> starts;
- vector<LocationWidget *> stops;
- int XYvals[30][2] = {{-52,1},{-45,1},{-44,3},{-38,4},{-22,2},{-15,3}, {-12,2},{-8,1}, {-6,4},
-                      {-49,51},{-48,52},{-46,54},{-27,51},
-                      {5,23},{4,33},{3,35},{4,44},{2,45},{3,55},
-                      {33,33},{45,45},{50,50},{52,52},{66,45},
-                      {35,3},{49,2},{50,3},{50,1},{52,2},{53,3}};
-
- Path * sets [numDays];
- LocationWidget * points[30];
- LocationWidget *s1 = new LocationWidget(&window1,1,2,windowWidth, windowHeight,Qt::green);
- starts.push_back(s1);
-
- LocationWidget *f1= new LocationWidget(&window1,5,3,windowWidth, windowHeight,Qt::red);
- stops.push_back(f1);
-
- for( int i = 0; i < 30; i++){
-     points[i] = new LocationWidget(&window1,XYvals[i][0],XYvals[i][1], windowWidth, windowHeight);
-     points[i]->setGeometry(windowWidth/2 + XYvals[i][0]*4,windowHeight/2 - XYvals[i][1]*4, 100, 100);
-     locations.push_back(points[i]);
- }
-
- sort(locations.begin(),locations.end(),locationRadiansComparator);
 
 
- for(int i = 0; i < numDays; i++) {
-     sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
-     sets[i]->setGeometry(0,0,windowWidth, windowHeight);
- }
+    QApplication app (argc, argv);
+    QWidget window1;
+    QWidget window2;
 
- divideLocations(locations,starts,stops,sets);
- QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
- //bkgnd = bkgnd.scaled(windowSize,windowSize,Qt::KeepAspectRatio);
- QPalette palette;
- palette.setBrush(QPalette::Background, bkgnd);
- window1.setPalette(palette);
+    pathColors[0] = Qt::blue;
+    pathColors[1] = Qt::yellow;
+    pathColors[2] = Qt::darkCyan;
+    pathColors[3] = Qt::gray;
+    pathColors[4] = Qt::cyan;
+    pathColors[5] = Qt::magenta;
+    pathColors[6] = Qt::darkGreen;
+    window1.setFixedSize(windowWidth, windowHeight);
+    window2.setFixedSize(dashBoardSize, windowHeight);
 
- dashBoard * d = new dashBoard(&window2,sets, numDays);
- d->setGeometry(0,0, dashBoardSize, windowHeight);
+    //get the long and lat for each address in the addresses.txt file
+    string LongLatfilename = "/home/jgreen/LocationSorter/addressesOut.txt";
+    string command = "python /home/jgreen/LocationSorter/addressConverter.py ";
+    system(command.c_str());
+    extra = 0;
+    string line;
+
+    vector<LocationWidget *> locations;
+    ifstream myfile (LongLatfilename);
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ) {
+        float longitude = stof(line.substr(0,line.find(',')));
+        float latitude = stof(line.substr(line.find(',') + 1,line.length() - 1));
+        extra++;
+        latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
+        longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
+         LocationWidget * newLoc = new LocationWidget(&window1,latitude,longitude, windowWidth, windowHeight);
+         newLoc->setGeometry(0 + latitude - 50,0 - longitude - 50, 100, 100);
+         locations.push_back(newLoc);
+        }
+        myfile.close();
+    }
 
 
 
- window1.show();
- window2.show();
- return app.exec();
+
+
+    vector<LocationWidget *> starts;
+    vector<LocationWidget *> stops;
+
+    Path * sets [numDays];
+
+    LocationWidget *s1 = new LocationWidget(&window1,44.2323013,-79.3574353,windowWidth, windowHeight,Qt::green);
+    starts.push_back(s1);
+
+    LocationWidget *f1= new LocationWidget(&window1,44.4323013,-79.6574353,windowWidth, windowHeight,Qt::red);
+    stops.push_back(f1);
+
+    sort(locations.begin(),locations.end(),locationRadiansComparator);
+
+
+    for(int i = 0; i < numDays; i++) {
+        sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
+        sets[i]->setGeometry(0,0,windowWidth, windowHeight);
+    }
+
+    divideLocations(locations,starts,stops,sets);
+    QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
+    //bkgnd = bkgnd.scaled(windowSize,windowSize,Qt::KeepAspectRatio);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, bkgnd);
+    window1.setPalette(palette);
+
+    dashBoard * d = new dashBoard(&window2,sets, numDays);
+    d->setGeometry(0,0, dashBoardSize, windowHeight);
+
+
+
+    window1.show();
+    window2.show();
+
+
+
+    return app.exec();
 }

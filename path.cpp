@@ -65,11 +65,6 @@ void Path::travellingSalesman() {
   //cout << getStop()->getX() << ',' << getStop()->getY() << endl;
 }
 
-void Path::mousePressEvent(QMouseEvent* event){
-    bShowPath = false;
-    repaint();
-    //QGraphicsView::mousePressEvent(event);
-}
 void Path::paintEvent(QPaintEvent *event){
     if(bShowPath && otherPoints.size() > 0) {
         QPainter painter(this);

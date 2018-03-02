@@ -14,12 +14,12 @@ void LocationWidget::paintEvent(QPaintEvent *event){
     QPainter painter(this);
 
     if(bHighlighted == true) {
-        painter.setPen(QPen(color, 20, Qt::SolidLine, Qt::RoundCap));
-        painter.drawPoint(50,50);
+        painter.setPen(QPen(Qt::red, 8, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(4,4);
     }
     else {
         painter.setPen(QPen(color, 8, Qt::SolidLine, Qt::RoundCap));
-        painter.drawPoint(50,50);
+        painter.drawPoint(4,4);
     }
 }
 

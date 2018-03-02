@@ -34,7 +34,7 @@ bool locationRadiansComparator (LocationWidget*  l,  LocationWidget * r)
 
 int numDays = 5; //number of unqiue paths (days of work)
 int extra = 30; //number of outlying points
-int numPerDay = 7; //number of extra jobs per day
+int numPerDay = 6; //number of extra jobs per day
 int windowHeight = 682;
 int windowWidth = 1400;
 int dashBoardSize = 400;
@@ -99,6 +99,7 @@ void adjustSwaps(Path * p1, Path * p2) {
                 LocationWidget * temp = p2->otherPoints.at(j);
                 p2->otherPoints.at(j) = p1->otherPoints.at(i);
                 p1->otherPoints.at(i) = temp;
+                return;
             }
         }
      }
@@ -116,11 +117,12 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
         }
     }
 
-    adjustUnevenDays(sets); // if didnt fill all days, see if we can push some into the last set to minimize distance
-
-    for(int i = 0; i < numDays; i++) {
-        for(int j = i + 1; j < numDays; j++) {
-            adjustSwaps(sets[i],sets[j]); // swap the days that belong in diffrent path based on average distance
+    //adjustUnevenDays(sets); // if didnt fill all days, see if we can push some into the last set to minimize distance
+    for(int k = 0; k < 50; k++){
+        for(int i = 0; i < numDays; i++) {
+            for(int j = i + 1; j < numDays; j++) {
+                adjustSwaps(sets[i],sets[j]); // swap the days that belong in diffrent path based on average distance
+            }
         }
     }
 
@@ -144,7 +146,6 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 int main(int argc, char **argv)
 {
 
-
     QApplication app (argc, argv);
     QWidget window1;
     QWidget window2;
@@ -159,13 +160,21 @@ int main(int argc, char **argv)
     window1.setFixedSize(windowWidth, windowHeight);
     window2.setFixedSize(dashBoardSize, windowHeight);
 
+    Path * sets [numDays];
+    for(int i = 0; i < numDays; i++) {
+        sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
+        sets[i]->setGeometry(0,0,windowWidth, windowHeight);
+    }
+
+
     //get the long and lat for each address in the addresses.txt file
+
     string LongLatfilename = "/home/jgreen/LocationSorter/addressesOut.txt";
     string command = "python /home/jgreen/LocationSorter/addressConverter.py ";
     system(command.c_str());
     extra = 0;
-    string line;
 
+    string line;
     vector<LocationWidget *> locations;
     ifstream myfile (LongLatfilename);
     if (myfile.is_open()){
@@ -176,7 +185,7 @@ int main(int argc, char **argv)
         latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
         longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
          LocationWidget * newLoc = new LocationWidget(&window1,latitude,longitude, windowWidth, windowHeight);
-         newLoc->setGeometry(0 + latitude - 50,0 - longitude - 50, 100, 100);
+         newLoc->setGeometry(0 + latitude - 4,0 - longitude - 4, 100, 100);
          locations.push_back(newLoc);
         }
         myfile.close();
@@ -189,25 +198,19 @@ int main(int argc, char **argv)
     vector<LocationWidget *> starts;
     vector<LocationWidget *> stops;
 
-    Path * sets [numDays];
 
-    LocationWidget *s1 = new LocationWidget(&window1,44.2323013,-79.3574353,windowWidth, windowHeight,Qt::green);
+    LocationWidget *s1 = new LocationWidget(&window1,800,-100,windowWidth, windowHeight,Qt::green);
     starts.push_back(s1);
 
-    LocationWidget *f1= new LocationWidget(&window1,44.4323013,-79.6574353,windowWidth, windowHeight,Qt::red);
+    LocationWidget *f1= new LocationWidget(&window1,800,-100,windowWidth, windowHeight,Qt::red);
     stops.push_back(f1);
 
     sort(locations.begin(),locations.end(),locationRadiansComparator);
 
 
-    for(int i = 0; i < numDays; i++) {
-        sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
-        sets[i]->setGeometry(0,0,windowWidth, windowHeight);
-    }
 
     divideLocations(locations,starts,stops,sets);
     QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
-    //bkgnd = bkgnd.scaled(windowSize,windowSize,Qt::KeepAspectRatio);
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);
     window1.setPalette(palette);

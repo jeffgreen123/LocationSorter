@@ -36,7 +36,6 @@ public:
     void setShowPath(bool newShowPath);
     void travellingSalesman();
 protected:
-    void mousePressEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent *event) override;
 };
 

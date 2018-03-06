@@ -2,9 +2,9 @@
 #include "dashboard.h"
 using namespace std;
 LocationWidget::LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight,dashBoard * dBoard, QBrush color) :
-    QWidget(parent), x(x),y(y),windowHeight(windowHeight),windowWidth(windowWidth),color(color), dBoard(dBoard){
+    QWidget(parent), x(x),y(y),windowHeight(windowHeight),windowWidth(windowWidth),color(color), dBoard(dBoard),bHighlighted(false){
+
     radians = atan2(y + windowHeight/4,x - windowWidth/2);
-    bHighlighted = false;
 
 }
 LocationWidget::LocationWidget(const LocationWidget& l) {

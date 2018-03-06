@@ -6,6 +6,11 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
     select1 = nullptr;
     select2 = nullptr;
     QGridLayout *mainLayout = new QGridLayout;
+
+    QPushButton * printToFileButton = new QPushButton("Output to File");
+    connect(printToFileButton, SIGNAL(pressed()),this, SLOT(printPathsToFile()));
+    mainLayout->addWidget(printToFileButton, 0, 0, Qt::AlignTop);
+
     for(int i = 0; i <n; i++) {
         this->sets.push_back(sets[i]);
         QLabel * pathLabel = new QLabel(("Path" + QString::number(i)));
@@ -15,15 +20,14 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
         setLabels.push_back(pathLabel);
         pathLabel->setBuddy(viewCheckBox);
 
-        QSignalMapper mapper;
-
         connect(viewCheckBox, &QCheckBox::toggled, [=]{
             togglePath(i);
         });
 
-        mainLayout->addWidget(pathLabel, 0, i*2, Qt::AlignTop);
-        mainLayout->addWidget(viewCheckBox, 0, i*2 + 1, Qt::AlignTop);
+        mainLayout->addWidget(pathLabel, 1, i*2, Qt::AlignTop);
+        mainLayout->addWidget(viewCheckBox, 1, i*2 + 1, Qt::AlignTop);
     }
+
     QLabel * selectionStaticLabel1 = new QLabel("Selection 1" );
     QLabel * selectionStaticLabel2 = new QLabel("Selection 2" );
     mainLayout->addWidget(selectionStaticLabel1,10,0,1,5,Qt::AlignLeft);
@@ -63,6 +67,23 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
     mainLayout->addWidget(swap,15,5,1,5,Qt::AlignCenter);
     //mainLayout->addWidget(transformationsCheckBox, 5, 2, 1, 2, Qt::AlignRight);
     setLayout(mainLayout);
+
+}
+
+void dashBoard::printPathsToFile() {
+    string PathsFilename = "/home/jgreen/LocationSorter/pathsOut.txt";
+    ofstream myfile (PathsFilename);
+    for(int i = 0; i < numDays; i++) {
+        myfile << "DAY " << i << "\n";
+        myfile <<  sets[i]->getStart()->getAddress().toStdString() << "\n";
+        for(int j = 0; j < sets[i]->otherPoints.size(); j++) {
+            myfile << sets[i]->otherPoints[j]->getAddress().toStdString() << "\n";
+        }
+        myfile <<  sets[i]->getStop()->getAddress().toStdString() << "\n";
+
+    }
+    myfile.close();
+
 
 }
 void dashBoard::swapLocations() {

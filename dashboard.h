@@ -34,6 +34,7 @@ public slots:
     void togglePath(int pathNum);
     void toggleLocation(LocationWidget * newLocation);
     void swapLocations();
+    void printPathsToFile();
 };
 
 #endif // DASHBOARD_H

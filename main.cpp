@@ -77,6 +77,7 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
         sets[i]->travellingSalesman();
     }
 
+
 }
 
 int main(int argc, char **argv)
@@ -85,36 +86,38 @@ int main(int argc, char **argv)
     QApplication app (argc, argv);
     QWidget window1;
     QWidget window2;
-    QBrush pathColors [7] ={Qt::blue,Qt::yellow,Qt::darkCyan,Qt::gray,Qt::cyan,Qt::magenta,Qt::darkGreen}; //colors of each path
     int windowHeight = 682;
     int windowWidth = 1400;
     int dashBoardSize = 400;
-    float maxX = -78.365; //max X latitude
-    float minX = -80.51; // min X latitude
-    float maxY = 43.52; // max Y logtitude
-    float minY = 44.275; //max Y longtitude
+    float maxX = -78.365;
+    float minX = -80.51;
+    float maxY = 43.52;
+    float minY = 44.275;
+    QBrush pathColors [7] ={Qt::blue,Qt::yellow,Qt::darkCyan,Qt::gray,Qt::cyan,Qt::magenta,Qt::darkGreen};
     Path * sets [numDays];
-    dashBoard * dBoard = new dashBoard(&window2,sets, numDays); //dashBoard for swapping and seeing selections
-    vector<LocationWidget *> starts; // starts for the days
-    vector<LocationWidget *> stops; //stops for the days
-    vector<LocationWidget *> locations; // all the other locations
-    window1.setFixedSize(windowWidth, windowHeight);
-    window2.setFixedSize(dashBoardSize, windowHeight);
-
-
-
-
-    //path for each day
+    vector<LocationWidget *> locations; //additional locations to sort and find paths for
+    vector<LocationWidget *> starts; // start locations for each day
+    vector<LocationWidget *> stops; // end location for each day
 
     for(int i = 0; i < numDays; i++) {
         sets[i] = new Path(&window1,pathColors[i],true,windowWidth,windowHeight);
         sets[i]->setGeometry(0,0,windowWidth, windowHeight);
     }
 
+    dashBoard * dBoard = new dashBoard(&window2,sets, numDays);
+
+
+    window1.setFixedSize(windowWidth, windowHeight);
+    window2.setFixedSize(dashBoardSize, windowHeight);
+
+
+    //path for each day
+
 
     dBoard->setGeometry(0,0, dashBoardSize, windowHeight);
 
     //get the long and lat for each address in the addresses.txt file
+
     string LongLatfilename = "/home/jgreen/LocationSorter/addressesOut.txt";
     string command = "python /home/jgreen/LocationSorter/addressConverter.py ";
     system(command.c_str());
@@ -131,11 +134,9 @@ int main(int argc, char **argv)
 
             latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
             longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
-
             LocationWidget * newLoc = new LocationWidget(&window1,latitude,longitude, windowWidth, windowHeight,dBoard, Qt::black);
             newLoc->setAddress(address);
             newLoc->setGeometry(0 + latitude - 6,0 - longitude - 6, 12, 12);
-
             locations.push_back(newLoc);
         }
         myfile.close();
@@ -161,7 +162,6 @@ int main(int argc, char **argv)
         }
     }
 
-    // set background image to image of GTA
     QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);

@@ -7,9 +7,7 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
     select2 = nullptr;
     QGridLayout *mainLayout = new QGridLayout;
 
-    QPushButton * printToFileButton = new QPushButton("Output to File");
-    connect(printToFileButton, SIGNAL(pressed()),this, SLOT(printPathsToFile()));
-    mainLayout->addWidget(printToFileButton, 0, 0, Qt::AlignTop);
+
 
     for(int i = 0; i <n; i++) {
         this->sets.push_back(sets[i]);
@@ -24,9 +22,16 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
             togglePath(i);
         });
 
-        mainLayout->addWidget(pathLabel, 1, i*2, Qt::AlignTop);
-        mainLayout->addWidget(viewCheckBox, 1, i*2 + 1, Qt::AlignTop);
+        mainLayout->addWidget(pathLabel, 0, i*2, Qt::AlignTop);
+        mainLayout->addWidget(viewCheckBox, 0, i*2 + 1, Qt::AlignTop);
     }
+    QPushButton * printToFileButton = new QPushButton("Output to File");
+    connect(printToFileButton, SIGNAL(pressed()),this, SLOT(printPathsToFile()));
+    mainLayout->addWidget(printToFileButton, 1, 0,1,4, Qt::AlignLeft);
+
+    QPushButton * swap = new QPushButton("Swap Locations");
+    connect(swap, SIGNAL(pressed()),this, SLOT(swapLocations()));
+    mainLayout->addWidget(swap,1,5,1,4,Qt::AlignLeft);
 
     QLabel * selectionStaticLabel1 = new QLabel("Selection 1" );
     QLabel * selectionStaticLabel2 = new QLabel("Selection 2" );
@@ -58,14 +63,7 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
     mainLayout->addWidget(addressStaticLabel2,13,5,1,5,Qt::AlignLeft);
     mainLayout->addWidget(addressDynamicLabel1,14,0,1,5,Qt::AlignLeft);
     mainLayout->addWidget(addressDynamicLabel2,14,5,1,5,Qt::AlignLeft);
-    //mainLayout->addWidget(shapeLabel, 2, 0, Qt::AlignRight);
-   // mainLayout->addWidget(shapeComboBox, 2, 1);
 
-    QPushButton * swap = new QPushButton("Swap");
-
-    connect(swap, SIGNAL(pressed()),this, SLOT(swapLocations()));
-    mainLayout->addWidget(swap,15,5,1,5,Qt::AlignCenter);
-    //mainLayout->addWidget(transformationsCheckBox, 5, 2, 1, 2, Qt::AlignRight);
     setLayout(mainLayout);
 
 }

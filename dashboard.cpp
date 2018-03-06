@@ -1,5 +1,5 @@
 #include "dashboard.h"
-
+#include "QThread"
 dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),numDays(n)
 {
     currSelection = 0;
@@ -20,17 +20,6 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
         connect(viewCheckBox, &QCheckBox::toggled, [=]{
             togglePath(i);
         });
-
-        for(int j = 0; j < sets[i]->otherPoints.size();j++) {
-            QPushButton * locationButton = new QPushButton(QString::number(sets[i]->otherPoints[j]->getX()) +
-                                                           "," +
-                                                           QString::number(sets[i]->otherPoints[j]->getY()));
-            connect(locationButton, &QPushButton::pressed, [=]{
-                toggleLocation(i,j);
-            });
-            mainLayout->addWidget(locationButton, j + 1, i*2, Qt::AlignTop);
-
-        }
 
         mainLayout->addWidget(pathLabel, 0, i*2, Qt::AlignTop);
         mainLayout->addWidget(viewCheckBox, 0, i*2 + 1, Qt::AlignTop);
@@ -77,16 +66,21 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
 
 }
 void dashBoard::swapLocations() {
+
         float tempX = select1->getX();
         float tempY = select1->getY();
+
         QBrush tempColor = select1->getColor();
         QString tempAddress = select1->getAddress();
+
         select1->setCoordinates(select2->getX(),select2->getY());
         select1->setColor(select2->getColor());
         select1->setAddress(select2->getAddress());
+
         select2->setCoordinates(tempX,tempY);
         select2->setColor(tempColor);
         select2->setAddress(tempAddress);
+
         for(int i = 0; i < sets.size(); i++) {
             sets.at(i)->travellingSalesman();
         }
@@ -96,24 +90,23 @@ void dashBoard::togglePath(int pathNum) {
     sets[pathNum]->setShowPath(setCheckBoxes[pathNum]->checkState());
 }
 
-void dashBoard::toggleLocation(int pathNum, int locationNum) {
-    LocationWidget * newLocation = sets[pathNum]->otherPoints[locationNum];
+void dashBoard::toggleLocation(LocationWidget * newLocation) {
     if(newLocation != select1 && newLocation != select2) {
         coordinatesLabels.at(currSelection)->setText(QString::number(newLocation->getX()) +
                                                      "," +
                                                      QString::number(newLocation->getY()));
-        addressLabels.at(currSelection)->setText("test");
+        addressLabels.at(currSelection)->setText(newLocation->getAddress());
         if(currSelection == 0){
             if(select1)
                 select1->highlight();
-            select1 = sets[pathNum]->otherPoints[locationNum];
+            select1 = newLocation;
             currSelection = 1;
             select1->highlight();
         }
         else {
             if(select2)
                 select2->highlight();
-            select2 = sets[pathNum]->otherPoints[locationNum];
+            select2 = newLocation;
             currSelection = 0;
             select2->highlight();
             }

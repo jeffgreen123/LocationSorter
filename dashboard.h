@@ -32,7 +32,7 @@ signals:
 
 public slots:
     void togglePath(int pathNum);
-    void toggleLocation(int pathNum, int locationNum);
+    void toggleLocation(LocationWidget * newLocation);
     void swapLocations();
 };
 

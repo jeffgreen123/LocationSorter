@@ -11,7 +11,8 @@ for address in content:
     if location != None: 
         latitude = location.latitude
         longitude = location.longitude
-	outFile.write(str(latitude) + "," + str(longitude) + "\n");
+	address =  str(location.raw['address_components'][0]['short_name']) + " " + str(location.raw['address_components'][1]['short_name']);
+	outFile.write(str(latitude) + "," + str(longitude) + "=" + address + "\n");
         print latitude
         print longitude
 

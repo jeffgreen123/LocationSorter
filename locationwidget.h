@@ -8,6 +8,8 @@
 #include "string.h"
 #include <iostream>
 
+class dashBoard;
+
 class LocationWidget:public QWidget
 {
     Q_OBJECT
@@ -19,8 +21,9 @@ private:
     QString address;
     float radians;
     bool bHighlighted;
+    dashBoard * dBoard;
 public:
-    LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight, QBrush color = Qt::black);
+    LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight,dashBoard * dBoard, QBrush color = Qt::black);
     LocationWidget(const LocationWidget& l);
     void setColor(QBrush newcolor);
     void setAddress(QString newAddress);

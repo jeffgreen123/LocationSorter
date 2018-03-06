@@ -35,34 +35,40 @@ void Path::setShowPath(bool newShowPath) {
 void Path::travellingSalesman() {
     //cout << numJobs <<endl;
     int numJobs = otherPoints.size();
+    float minDistance = 1000000000;
+    vector<LocationWidget*> finalPath;
+    int pathIter[numJobs];
+    int bestPath[numJobs];
+    for(int i = 0; i < numJobs; i++) {
+        pathIter[i] = i;
+    }
     if(numJobs != 0){
-        vector<LocationWidget*> finalPath;
-
-        float minDistance = 1000000000;
         do {
 
-            float distance = getDistanceBetweenPoints(getStart(),otherPoints.at(0)) +
-                getDistanceBetweenPoints(getStop(),otherPoints.at(numJobs-1));
+            float distance = getDistanceBetweenPoints(getStart(),otherPoints.at(pathIter[0])) +
+                getDistanceBetweenPoints(getStop(),otherPoints.at(pathIter[numJobs - 1]));
             for(int i = 0; i < numJobs - 1; i++) {
-                distance += getDistanceBetweenPoints(otherPoints.at(i),otherPoints.at(i+1));
+                distance += getDistanceBetweenPoints(otherPoints.at(pathIter[i]),otherPoints.at(pathIter[i+1]));
             }
             if(distance <= minDistance){
-                for(int i = 0; i < numJobs; i++){
-                    finalPath = otherPoints;
+                for(int i = 0; i < numJobs; i++) {
+                    bestPath[i] = pathIter[i];
                 }
-                minDistance = distance;
+                    minDistance = distance;
             }
-      } while ( std::next_permutation(otherPoints.begin(), otherPoints.end()) );
+      } while ( std::next_permutation(pathIter, pathIter + numJobs));
+      for(int i = 0; i < numJobs; i++) {
+           finalPath.push_back(otherPoints.at(bestPath[i]));
+      }
       otherPoints = finalPath;
     }
-  //cout << "DISTANCE:"  << minDistance << endl;
-  //cout << getStart()->getX() << ',' << getStart()->getY() << " to ";
+  cout << "DISTANCE:"  << minDistance << endl;
+  cout << getStart()->getX() << ',' << getStart()->getY() << " to ";
 
   for( int i = 0; i < numJobs; i++) {
-      //cout << finalPath.at(i)->getX() << ',' << finalPath.at(i)->getY() << " to ";
+      cout << finalPath.at(i)->getX() << ',' << finalPath.at(i)->getY() << " to ";
   }
   repaint();
-  //cout << getStop()->getX() << ',' << getStop()->getY() << endl;
 }
 
 void Path::paintEvent(QPaintEvent *event){

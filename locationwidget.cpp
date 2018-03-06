@@ -1,9 +1,9 @@
 #include "locationwidget.h"
-
+#include "dashboard.h"
 using namespace std;
-LocationWidget::LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight, QBrush color) :
-    QWidget(parent), x(x),y(y),windowHeight(windowHeight),windowWidth(windowWidth),color(color){
-    radians = atan2(y,x);
+LocationWidget::LocationWidget(QWidget *parent,float x, float y,int windowWidth, int windowHeight,dashBoard * dBoard, QBrush color) :
+    QWidget(parent), x(x),y(y),windowHeight(windowHeight),windowWidth(windowWidth),color(color), dBoard(dBoard){
+    radians = atan2(y + windowHeight/4,x - windowWidth/2);
     bHighlighted = false;
 
 }
@@ -14,18 +14,18 @@ void LocationWidget::paintEvent(QPaintEvent *event){
     QPainter painter(this);
 
     if(bHighlighted == true) {
-        painter.setPen(QPen(Qt::red, 8, Qt::SolidLine, Qt::RoundCap));
-        painter.drawPoint(4,4);
+        painter.setPen(QPen(Qt::red, 12, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(6,6);
     }
     else {
-        painter.setPen(QPen(color, 8, Qt::SolidLine, Qt::RoundCap));
-        painter.drawPoint(4,4);
+        painter.setPen(QPen(color, 12, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(6,6);
     }
 }
 
 void LocationWidget::mousePressEvent(QMouseEvent*){
 
-    this->setColor(Qt::red);
+    dBoard->toggleLocation(this);
     repaint();
 
 }
@@ -39,9 +39,9 @@ void LocationWidget::setAddress(QString newAddress) {
     address = newAddress;
 }
 
-void LocationWidget::setCoordinates(float x, float y) {
-    this->x = x;
-    this->y = y;
+void LocationWidget::setCoordinates(float newX, float newY) {
+    x = newX;
+    y = newY;
     repaint();
 }
 

@@ -6,10 +6,10 @@ WORK IN PROGRESS
 This will be an application that my father uses giving a set number of job locations, and the start and end of each day
 </br>
 </br>
-Make sure the addressConverter.py and addresses.txt is in the same folder as the Qt executable
+Make sure the addressConverter.py, addresses.txt, starts.txt and stops.txt are all in the same folder as the Qt executable
 </br>
 </br>
-Input the addresses you want to use in that file seperated by a new line
+Input the addresses, starts, and stops you want to use in their respective file seperated by a new line, make sure starts and stops have the same size (used to determine # of days)
 </br>
 </br>
 The python file will call a web API to convert these addresses to latitude and longtitude values

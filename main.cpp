@@ -22,8 +22,6 @@
 #include <unistd.h>
 using namespace std;
 
-int numDays = 5; //number of unqiue paths (days of work)
-int numPerDay = 6; //number of extra jobs per day
 
 
 // comparator of radians of location widgets
@@ -51,7 +49,7 @@ void adjustSwaps(Path * p1, Path * p2) {
 }
 
 //divide the locations based on their radian values
-void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget *> starts, vector <LocationWidget *> stops, Path * sets []) {
+void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget *> starts, vector <LocationWidget *> stops, Path * sets [], int numDays, int numPerDay) {
 
 
     int currSet = 0; //current path being filled
@@ -82,6 +80,29 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 
 }
 
+void getAddressesFromFile(vector<LocationWidget *> &locations, string fileName, float minX,float maxX,float minY,float maxY,
+                          float windowHeight, float windowWidth, dashBoard * dBoard, QWidget * window) {
+    ifstream addressesFile (fileName);
+    if (addressesFile.is_open()){
+        string line;
+        while ( getline (addressesFile,line) ) {
+
+            float longitude = stof(line.substr(0,line.find(',')));
+            float latitude = stof(line.substr(line.find(',') + 1,line.find('=')));
+            QString address = QString::fromStdString(line.substr(line.find('=') + 1,line.length() - 1));
+
+            latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
+            longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
+            LocationWidget * newLoc = new LocationWidget(window,latitude,longitude, windowWidth, windowHeight,dBoard, Qt::black);
+            newLoc->setAddress(address);
+            newLoc->setGeometry(0 + latitude - 6,0 - longitude - 6, 12, 12);
+            locations.push_back(newLoc);
+        }
+        addressesFile.close();
+    }
+
+}
+
 int main(int argc, char **argv)
 {
     QApplication app (argc, argv);
@@ -94,6 +115,8 @@ int main(int argc, char **argv)
     float minX = -80.51; // minmum Latitude (left of screen)
     float maxY = 43.52; // max longtitude (top of screen)
     float minY = 44.275; // min longtitude (bottom of screen)
+    int numDays = 5; //number of unqiue paths (days of work)
+    int numPerDay = 6; //number of extra jobs per day
     QBrush pathColors [7] ={Qt::blue,Qt::yellow,Qt::darkCyan,Qt::gray,Qt::cyan,Qt::magenta,Qt::darkGreen};
     Path * sets [numDays]; // Path for each days work
     vector<LocationWidget *> locations; //additional locations to sort and find paths for
@@ -106,53 +129,32 @@ int main(int argc, char **argv)
     }
 
     dashBoard * dBoard = new dashBoard(&window2,sets, numDays);
-
+    dBoard->setGeometry(0,0, dashBoardSize, windowHeight);
 
     window1.setFixedSize(windowWidth, windowHeight);
     window2.setFixedSize(dashBoardSize, windowHeight);
 
 
 
-    dBoard->setGeometry(0,0, dashBoardSize, windowHeight);
+    //get the long and lat for each address
 
-    //get the long and lat for each address in the addresses.txt file
-
-    string LongLatfilename = "addressesOut.txt";
-    string command = "python addressConverter.py ";
+    string command = "python addressConverter.py";
     system(command.c_str());
 
-    string line;
+    getAddressesFromFile(locations, "addressesOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
+    getAddressesFromFile(starts, "startsOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
+    getAddressesFromFile(stops, "stopsOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
 
-    ifstream myfile (LongLatfilename);
-    if (myfile.is_open()){
-        while ( getline (myfile,line) ) {
-
-            float longitude = stof(line.substr(0,line.find(',')));
-            float latitude = stof(line.substr(line.find(',') + 1,line.find('=')));
-            QString address = QString::fromStdString(line.substr(line.find('=') + 1,line.length() - 1));
-
-            latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
-            longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
-            LocationWidget * newLoc = new LocationWidget(&window1,latitude,longitude, windowWidth, windowHeight,dBoard, Qt::black);
-            newLoc->setAddress(address);
-            newLoc->setGeometry(0 + latitude - 6,0 - longitude - 6, 12, 12);
-            locations.push_back(newLoc);
-        }
-        myfile.close();
+    // make sure we have same amount of starts and stops
+    if(starts.size() != stops.size()) {
+        cerr << "not equal number of starts and stops" << endl;
+        return -1;
     }
-
-
-
-    //temp start and finish values
-    LocationWidget *s1 = new LocationWidget(&window1,800,-100,windowWidth, windowHeight,dBoard,Qt::green);
-    starts.push_back(s1);
-
-    LocationWidget *f1= new LocationWidget(&window1,800,-100,windowWidth, windowHeight,dBoard, Qt::red);
-    stops.push_back(f1);
+    numDays = starts.size();
 
     sort(locations.begin(),locations.end(),locationRadiansComparator);
 
-    divideLocations(locations,starts,stops,sets);
+    divideLocations(locations,starts,stops,sets, numDays, numPerDay);
 
     //set the color of the points
     for(int i = 0; i < numDays; i++) {
@@ -161,6 +163,8 @@ int main(int argc, char **argv)
         }
     }
 
+
+    //set background image
     QPixmap bkgnd("GTA.png");
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);

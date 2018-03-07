@@ -18,6 +18,8 @@
 #include <QGeoCoordinate>
 #include <QGeoLocation>
 #include <QGeoServiceProvider>
+#include <limits.h>
+#include <unistd.h>
 using namespace std;
 
 int numDays = 5; //number of unqiue paths (days of work)
@@ -82,19 +84,21 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 
 int main(int argc, char **argv)
 {
-
+    char result[ PATH_MAX ];
+    ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+    cout << std::string( result, (count > 0) ? count : 0 ) << endl;
     QApplication app (argc, argv);
     QWidget window1;
     QWidget window2;
     int windowHeight = 682;
     int windowWidth = 1400;
     int dashBoardSize = 400;
-    float maxX = -78.365;
-    float minX = -80.51;
-    float maxY = 43.52;
-    float minY = 44.275;
+    float maxX = -78.365; // maxLatitude (right of screen)
+    float minX = -80.51; // minmum Latitude (left of screen)
+    float maxY = 43.52; // max longtitude (top of screen)
+    float minY = 44.275; // min longtitude (bottom of screen)
     QBrush pathColors [7] ={Qt::blue,Qt::yellow,Qt::darkCyan,Qt::gray,Qt::cyan,Qt::magenta,Qt::darkGreen};
-    Path * sets [numDays];
+    Path * sets [numDays]; // Path for each days work
     vector<LocationWidget *> locations; //additional locations to sort and find paths for
     vector<LocationWidget *> starts; // start locations for each day
     vector<LocationWidget *> stops; // end location for each day
@@ -118,8 +122,8 @@ int main(int argc, char **argv)
 
     //get the long and lat for each address in the addresses.txt file
 
-    string LongLatfilename = "/home/jgreen/LocationSorter/addressesOut.txt";
-    string command = "python /home/jgreen/LocationSorter/addressConverter.py ";
+    string LongLatfilename = "addressesOut.txt";
+    string command = "python addressConverter.py ";
     system(command.c_str());
 
     string line;
@@ -162,7 +166,7 @@ int main(int argc, char **argv)
         }
     }
 
-    QPixmap bkgnd("/home/jgreen/LocationSorter/GTA.png");
+    QPixmap bkgnd("GTA.png");
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);
     window1.setPalette(palette);

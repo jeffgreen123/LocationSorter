@@ -69,8 +69,11 @@ dashBoard::dashBoard(QWidget *parent, Path * sets[], int n) : QWidget(parent),nu
 }
 
 void dashBoard::printPathsToFile() {
-    string PathsFilename = "/home/jgreen/LocationSorter/pathsOut.txt";
+
+
+    string PathsFilename = "pathsOut.txt";
     ofstream myfile (PathsFilename);
+
     for(int i = 0; i < numDays; i++) {
         myfile << "DAY " << i << "\n";
         myfile <<  sets[i]->getStart()->getAddress().toStdString() << "\n";
@@ -78,7 +81,6 @@ void dashBoard::printPathsToFile() {
             myfile << sets[i]->otherPoints[j]->getAddress().toStdString() << "\n";
         }
         myfile <<  sets[i]->getStop()->getAddress().toStdString() << "\n";
-
     }
     myfile.close();
 
@@ -88,7 +90,6 @@ void dashBoard::swapLocations() {
 
         float tempX = select1->getX();
         float tempY = select1->getY();
-
         QBrush tempColor = select1->getColor();
         QString tempAddress = select1->getAddress();
 
@@ -102,7 +103,7 @@ void dashBoard::swapLocations() {
 
         for(int i = 0; i < sets.size(); i++) {
             sets.at(i)->travellingSalesman();
-        }
+            }
     }
 
 void dashBoard::togglePath(int pathNum) {
@@ -110,24 +111,34 @@ void dashBoard::togglePath(int pathNum) {
 }
 
 void dashBoard::toggleLocation(LocationWidget * newLocation) {
+
     if(newLocation != select1 && newLocation != select2) {
+
         coordinatesLabels.at(currSelection)->setText(QString::number(newLocation->getX()) +
                                                      "," +
                                                      QString::number(newLocation->getY()));
+
         addressLabels.at(currSelection)->setText(newLocation->getAddress());
+
         if(currSelection == 0){
+
             if(select1)
                 select1->highlight();
+
             select1 = newLocation;
             currSelection = 1;
             select1->highlight();
+
         }
         else {
+
             if(select2)
                 select2->highlight();
+
             select2 = newLocation;
             currSelection = 0;
             select2->highlight();
+
             }
         }
     }

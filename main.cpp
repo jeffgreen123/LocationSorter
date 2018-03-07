@@ -84,9 +84,6 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 
 int main(int argc, char **argv)
 {
-    char result[ PATH_MAX ];
-    ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-    cout << std::string( result, (count > 0) ? count : 0 ) << endl;
     QApplication app (argc, argv);
     QWidget window1;
     QWidget window2;
@@ -114,8 +111,6 @@ int main(int argc, char **argv)
     window1.setFixedSize(windowWidth, windowHeight);
     window2.setFixedSize(dashBoardSize, windowHeight);
 
-
-    //path for each day
 
 
     dBoard->setGeometry(0,0, dashBoardSize, windowHeight);

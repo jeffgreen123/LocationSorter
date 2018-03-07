@@ -72,8 +72,8 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 
     //set start and stops for each day
     for(int i = 0; i < numDays; i++) {
-        sets[i]->setStart(starts.at(0));
-        sets[i]->setStop(stops.at(0));
+        sets[i]->setStart(starts.at(i));
+        sets[i]->setStop(stops.at(i));
         sets[i]->travellingSalesman();
     }
 

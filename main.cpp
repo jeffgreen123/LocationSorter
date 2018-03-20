@@ -65,7 +65,7 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
     for(int k = 0; k < 100; k++){
         for(int i = 0; i < numDays; i++) {
             for(int j = i + 1; j < numDays; j++) {
-                adjustSwaps(sets[i],sets[j]); //swap some of the elements that were not placed in the correct location
+                //adjustSwaps(sets[i],sets[j]); //swap some of the elements that were not placed in the correct location
             }
         }
     }
@@ -97,6 +97,34 @@ void getAddressesFromFile(vector<LocationWidget *> &locations, string fileName, 
             newLoc->setAddress(address);
             newLoc->setGeometry(0 + latitude - 6,0 - longitude - 6, 12, 12);
             locations.push_back(newLoc);
+        }
+        addressesFile.close();
+    }
+
+}
+
+void getAddressesFromFile(Path * sets[], string fileName, float minX,float maxX,float minY,float maxY,
+                          float windowHeight, float windowWidth, dashBoard * dBoard, QWidget * window) {
+    ifstream addressesFile (fileName);
+    if (addressesFile.is_open()){
+        string line;
+        int currSet = 0;
+        while ( getline (addressesFile,line) ) {
+            if(line == ""){
+                currSet++;
+            }
+            else{
+                float longitude = stof(line.substr(0,line.find(',')));
+                float latitude = stof(line.substr(line.find(',') + 1,line.find('=')));
+                QString address = QString::fromStdString(line.substr(line.find('=') + 1,line.length() - 1));
+
+                latitude = (latitude - minX)/abs(maxX - minX)*windowWidth;
+                longitude = (longitude - minY)/abs(maxY - minY)*windowHeight;
+                LocationWidget * newLoc = new LocationWidget(window,latitude,longitude, windowWidth, windowHeight,dBoard, Qt::black);
+                newLoc->setAddress(address);
+                newLoc->setGeometry(0 + latitude - 6,0 - longitude - 6, 12, 12);
+                sets[currSet]->otherPoints.push_back(newLoc);
+            }
         }
         addressesFile.close();
     }
@@ -141,7 +169,7 @@ int main(int argc, char **argv)
     string command = "python addressConverter.py";
     system(command.c_str());
 
-    getAddressesFromFile(locations, "addressesOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
+    getAddressesFromFile(sets, "addressesOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
     getAddressesFromFile(starts, "startsOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
     getAddressesFromFile(stops, "stopsOut.txt",minX,maxX,minY,maxY,windowHeight,windowWidth,dBoard,&window1);
 
@@ -152,7 +180,7 @@ int main(int argc, char **argv)
     }
 
     numDays = starts.size();
-    sort(locations.begin(),locations.end(),locationRadiansComparator);
+    //sort(locations.begin(),locations.end(),locationRadiansComparator);
 
     divideLocations(locations,starts,stops,sets, numDays, numPerDay);
 

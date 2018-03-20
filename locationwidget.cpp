@@ -14,7 +14,7 @@ void LocationWidget::paintEvent(QPaintEvent *event){
     QPainter painter(this);
 
     if(bHighlighted == true) {
-        painter.setPen(QPen(Qt::red, 12, Qt::SolidLine, Qt::RoundCap));
+        painter.setPen(QPen(Qt::black, 12, Qt::SolidLine, Qt::RoundCap));
         painter.drawPoint(6,6);
     }
     else {

@@ -45,7 +45,7 @@ void adjustSwaps(Path * p1, Path * p2) {
                 return;
             }
         }
-     }
+    }
 }
 
 //divide the locations based on their radian values
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     float maxY = 43.52; // max longtitude (top of screen)
     float minY = 44.275; // min longtitude (bottom of screen)
     int numDays = 5; //number of unqiue paths (days of work)
-    int numPerDay = 6; //number of extra jobs per day
+    int numPerDay = 7; //number of extra jobs per day
     QBrush pathColors [7] ={Qt::blue,Qt::yellow,Qt::darkCyan,Qt::gray,Qt::cyan,Qt::magenta,Qt::darkGreen};
     Path * sets [numDays]; // Path for each days work
     vector<LocationWidget *> locations; //additional locations to sort and find paths for
@@ -150,8 +150,8 @@ int main(int argc, char **argv)
         cerr << "not equal number of starts and stops" << endl;
         return -1;
     }
-    numDays = starts.size();
 
+    numDays = starts.size();
     sort(locations.begin(),locations.end(),locationRadiansComparator);
 
     divideLocations(locations,starts,stops,sets, numDays, numPerDay);
@@ -162,7 +162,10 @@ int main(int argc, char **argv)
             sets[i]->otherPoints.at(j)->setColor(pathColors[i]);
         }
     }
-
+    for(int i = 0; i < numDays; i++) {
+        starts[i]->setColor(Qt::green);
+        stops[i]->setColor(Qt::red);
+    }
 
     //set background image
     QPixmap bkgnd("GTA.png");
@@ -170,13 +173,8 @@ int main(int argc, char **argv)
     palette.setBrush(QPalette::Background, bkgnd);
     window1.setPalette(palette);
 
-
-
-
     window1.show();
     window2.show();
-
-
 
     return app.exec();
 }

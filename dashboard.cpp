@@ -75,12 +75,13 @@ void dashBoard::printPathsToFile() {
     ofstream myfile (PathsFilename);
 
     for(int i = 0; i < numDays; i++) {
-        myfile << "DAY " << i << "\n";
+        myfile << "DAY " << i + 1 << "\n";
         myfile <<  sets[i]->getStart()->getAddress().toStdString() << "\n";
         for(int j = 0; j < sets[i]->otherPoints.size(); j++) {
             myfile << sets[i]->otherPoints[j]->getAddress().toStdString() << "\n";
         }
         myfile <<  sets[i]->getStop()->getAddress().toStdString() << "\n";
+        myfile << "\n";
     }
     myfile.close();
 
@@ -102,7 +103,7 @@ void dashBoard::swapLocations() {
         select2->setAddress(tempAddress);
 
         for(int i = 0; i < sets.size(); i++) {
-            sets.at(i)->travellingSalesman();
+            sets.at(i)->repaint();
             }
     }
 

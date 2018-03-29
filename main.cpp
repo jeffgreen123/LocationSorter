@@ -80,8 +80,17 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
 
 }
 
+
+//get addresses for starts and stops from file
 void getAddressesFromFile(vector<LocationWidget *> &locations, string fileName, float minX,float maxX,float minY,float maxY,
                           float windowHeight, float windowWidth, dashBoard * dBoard, QWidget * window) {
+    /*file looks like
+     * long,lat=address
+     * long,lat=address
+     *
+     * long,lat=address
+     * long,lat=address
+    */
     ifstream addressesFile (fileName);
     if (addressesFile.is_open()){
         string line;
@@ -103,8 +112,16 @@ void getAddressesFromFile(vector<LocationWidget *> &locations, string fileName, 
 
 }
 
+//get addresses for main sets from file
 void getAddressesFromFile(Path * sets[], string fileName, float minX,float maxX,float minY,float maxY,
                           float windowHeight, float windowWidth, dashBoard * dBoard, QWidget * window) {
+    /*file looks like
+     * long,lat=address
+     * long,lat=address
+     *
+     * long,lat=address
+     * long,lat=address
+    */
     ifstream addressesFile (fileName);
     if (addressesFile.is_open()){
         string line;
@@ -190,6 +207,7 @@ int main(int argc, char **argv)
             sets[i]->otherPoints.at(j)->setColor(pathColors[i]);
         }
     }
+
     for(int i = 0; i < numDays; i++) {
         starts[i]->setColor(Qt::green);
         stops[i]->setColor(Qt::red);

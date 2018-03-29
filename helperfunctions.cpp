@@ -1,5 +1,6 @@
 #include "helperfunctions.h"
 
+//get average radians of a set of locations
 float getAverageRadians(vector<LocationWidget *> locations) {
     float average = 0;
     for(int i = 0; i < locations.size(); i++) {
@@ -9,7 +10,7 @@ float getAverageRadians(vector<LocationWidget *> locations) {
     return average;
 }
 
-
+//get average distance of one point to the rest in a list
 float getAverageDistance(vector<LocationWidget *> locations, LocationWidget * point, int currIndex) {
     float average = 0;
     for(int i = 0; i < locations.size(); i++) {
@@ -21,9 +22,9 @@ float getAverageDistance(vector<LocationWidget *> locations, LocationWidget * po
     return average;
 }
 
+
 float getDistanceBetweenPoints(LocationWidget * l1, LocationWidget * l2) {
     float distX = fabs(l1->getX() - l2->getX());
     float distY = fabs(l1->getY() - l2->getY());
-    //cout << l1.latitude << ',' <<  l1.longtitude <<  endl;
     return sqrtf(pow(distX,2) + pow(distY,2));
 }

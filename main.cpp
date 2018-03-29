@@ -12,11 +12,7 @@
 #include <QGeoCoordinate>
 #include <QGeoAddress>
 #include <QGeoLocation>
-#include <QApplication>
-#include <QGeoAddress>
 #include <QGeoCodingManager>
-#include <QGeoCoordinate>
-#include <QGeoLocation>
 #include <QGeoServiceProvider>
 #include <limits.h>
 #include <unistd.h>
@@ -24,33 +20,12 @@ using namespace std;
 
 
 
-// comparator of radians of location widgets
-bool locationRadiansComparator (LocationWidget*  l,  LocationWidget * r)
-   { return l->getRadians() > r->getRadians(); }
 
 
-// attempt to swap any locations that are closer to the elements in a diffrent path
-void adjustSwaps(Path * p1, Path * p2) {
-    for(int i = 0; i < p1->otherPoints.size(); i++) {
-        for(int j = 0; j < p2->otherPoints.size(); j++) {
-            float averageL2P1Dist = getAverageDistance(p1->otherPoints, p2->otherPoints.at(j),-1);
-            float averageL2P2Dist = getAverageDistance(p2->otherPoints, p2->otherPoints.at(j),j);
-            float averageL1P1Dist = getAverageDistance(p1->otherPoints, p1->otherPoints.at(i),i);
-            float averageL1P2Dist = getAverageDistance(p2->otherPoints, p1->otherPoints.at(i),-1);
 
-            if((averageL1P1Dist - averageL1P2Dist) + (averageL2P2Dist - averageL2P1Dist) >= 0) {
-                LocationWidget * temp = p2->otherPoints.at(j);
-                p2->otherPoints.at(j) = p1->otherPoints.at(i);
-                p1->otherPoints.at(i) = temp;
-                return;
-            }
-        }
-    }
-}
 
 //divide the locations based on their radian values
 void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget *> starts, vector <LocationWidget *> stops, Path * sets [], int numDays, int numPerDay) {
-
 
     int currSet = 0; //current path being filled
     while(!locations.empty() && currSet < numDays) {
@@ -61,23 +36,12 @@ void divideLocations(vector <LocationWidget *> locations,vector <LocationWidget 
         }
     }
 
-    // allow up to 100 swaps (if the radian split was not optimal)
-    for(int k = 0; k < 100; k++){
-        for(int i = 0; i < numDays; i++) {
-            for(int j = i + 1; j < numDays; j++) {
-                //adjustSwaps(sets[i],sets[j]); //swap some of the elements that were not placed in the correct location
-            }
-        }
-    }
-
     //set start and stops for each day
     for(int i = 0; i < numDays; i++) {
         sets[i]->setStart(starts.at(i));
         sets[i]->setStop(stops.at(i));
         sets[i]->travellingSalesman();
     }
-
-
 }
 
 
@@ -197,7 +161,6 @@ int main(int argc, char **argv)
     }
 
     numDays = starts.size();
-    //sort(locations.begin(),locations.end(),locationRadiansComparator);
 
     divideLocations(locations,starts,stops,sets, numDays, numPerDay);
 

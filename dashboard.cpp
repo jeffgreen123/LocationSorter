@@ -121,6 +121,7 @@ void dashBoard::toggleLocation(LocationWidget * newLocation) {
 
         addressLabels.at(currSelection)->setText(newLocation->getAddress());
 
+        //alternate between selection 1 and 2
         if(currSelection == 0){
 
             if(select1)
